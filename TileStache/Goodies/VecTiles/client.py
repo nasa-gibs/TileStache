@@ -38,6 +38,8 @@ from StringIO import StringIO
 from urlparse import urlparse
 from gzip import GzipFile
 
+import subprocess
+import os
 import logging
 
 from . import mvt, geojson
@@ -146,6 +148,40 @@ def load_tile_features(lock, host, port, path_fmt, tiles, features):
             
             elif mime_type == 'application/octet-stream+mvt':
                 file_features = mvt.decode(file)
+
+            elif mime_type == 'application/vnd.mapbox-vector-tile':
+            	
+            	# Convert protobuf-encoded vector tile to GeoJSON via vt-geojson
+            	vt_cmd_exist = subprocess.call(["which", "vt-geojson"], stdout=subprocess.PIPE)
+            	
+            	if vt_cmd_exist:
+            		logging.error('vector tile to geojson executable (vt-geojson) not found; skipping tile')
+	                return
+            	
+            	logging.debug('Converting protobuf MVT into GeoJSON')
+            	
+            	# FIXME: quick hack to get layer name
+            	layer_name = str.split(path_fmt, '/')[2]
+            	
+            	geojson_filename = '/tmp/tmptile.geojson'
+            	if os.path.isfile(geojson_filename):
+            		os.remove(geojson_filename)
+
+            	with open(geojson_filename, 'w') as outfile:
+            		vt_cmd_run = subprocess.call(["vt-geojson", layer_name, "--tile", str(tile['x']), str(tile['y']), str(tile['z'])], stdout=outfile)
+            		
+	            	if vt_cmd_run:
+						logging.error('Error while executing vt-geojson')
+						return
+					
+	            	statinfo = os.stat(geojson_filename)
+	            	if statinfo.st_size == 0:
+	            		logging.error('Output file is empty')
+
+            	# Read features from newly-converted GeoJSON file
+            	with open(geojson_filename, 'r') as outfile:					
+	            	file_features = geojson.decode(outfile)
+            	
             
             else:
                 logging.error('Unknown MIME-Type "%s" from %s:%d%s' % (mime_type, host, port, path))
