@@ -163,23 +163,34 @@ def load_tile_features(lock, host, port, path_fmt, tiles, features):
             	# FIXME: quick hack to get layer name
             	layer_name = str.split(path_fmt, '/')[2]
             	
-            	geojson_filename = '/tmp/tmptile.geojson'
-            	if os.path.isfile(geojson_filename):
-            		os.remove(geojson_filename)
-
-            	with open(geojson_filename, 'w') as outfile:
-            		vt_cmd_run = subprocess.call(["vt-geojson", layer_name, "--tile", str(tile['x']), str(tile['y']), str(tile['z'])], stdout=outfile)
+            	# Generate cacheable filename
+            	# Possible TODO: make path less hardcoded, use better path separator
+            	geojson_dir = "/tmp/stachecache/" + layer_name + "/" + str(tile['z']) + "/" + str(tile['x']) + "/" 
+            	geojson_full_path = geojson_dir + str(tile['y']) + ".json"
+            	# geojson_filename = '/tmp/tmptile.geojson'
+            	if os.path.isfile(geojson_full_path):
+            		# os.remove(geojson_filename)
+            		logging.debug('Found cached tile and using it: ', geojson_full_path)
             		
-	            	if vt_cmd_run:
-						logging.error('Error while executing vt-geojson')
-						return
-					
-	            	statinfo = os.stat(geojson_filename)
-	            	if statinfo.st_size == 0:
-	            		logging.error('Output file is empty')
+            	else:
+            		# Ensure directory exists
+            		if not os.path.exists(geojson_dir):
+            			os.makedirs(geojson_dir)
+            		
+	            	with open(geojson_full_path, 'w') as outfile:
+    	        		vt_cmd_run = subprocess.call(["vt-geojson", layer_name, "--tile", str(tile['x']), str(tile['y']), str(tile['z'])], stdout=outfile)
+            		
+	    	        	if vt_cmd_run:
+							logging.error('Error while executing vt-geojson')
+							return
+
+				# Check for valid GeoJSON					
+            	statinfo = os.stat(geojson_full_path)
+            	if statinfo.st_size == 0:
+	        		logging.error('Output file is empty')
 
             	# Read features from newly-converted GeoJSON file
-            	with open(geojson_filename, 'r') as outfile:					
+            	with open(geojson_full_path, 'r') as outfile:					
 	            	file_features = geojson.decode(outfile)
             	
             
