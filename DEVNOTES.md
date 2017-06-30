@@ -50,6 +50,9 @@ CURRENT DEV STEPS
 
 - may also want to not require access token to be in Mapnik XML files and instead try to pull from $MapboxAccessToken environment variable.  tried to “$MapboxAccessToken” directly within XML file but it just got picked up as a literal
 
+- create script to programmatically generate tiles at GIBS-compatible tile grids
+
+
 - ALTERNATIVELY: use [mapnik-vector-tile](https://github.com/mapbox/mapnik-vector-tile) to read mapnik stylesheets and render images;  probably should do that anyway to fix possible styling issues based on old version of mapnik and horrible installation processes to get there.  It requires mapnik3 built from master, though, as opposed to homebrew’s version
 
 CURRENT EVALUATION STEPS
