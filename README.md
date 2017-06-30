@@ -9,7 +9,7 @@ based on rendered geographic data. You might be familiar with [TileCache](http:/
 the venerable open source WMS server from MetaCarta. TileStache is similar, but we hope
 simpler and better-suited to the needs of designers and cartographers.
 
-This nasa-gibs fork has been lightly modified to handle protobuf-encoded Mapbox Vector Tiles using DevSeed's [vt-geojson](https://github.com/developmentseed/vt-geojson) utility.
+This nasa-gibs fork has been lightly modified to handle protobuf-encoded Mapbox Vector Tiles using DevSeed's [vt-geojson](https://github.com/developmentseed/vt-geojson) utility.  See [DEVNOTES](https://github.com/nasa-gibs/TileStache/blob/master/DEVNOTES.md) for rough installation instructions.
 
 ##Synopsis
 
