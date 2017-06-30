@@ -38,6 +38,25 @@ Tilestache / Mapnik installation instructions to render Mapnik-styled MVTs to im
       nik2img.py mapbox-tilejson-simple.xml nik2img-output991.png -v -z 2 -c -40 70 -d 800 800
 
 
+CURRENT DEV STEPS
+- create script to convert Mapbox Studio Classic / Mapnik XML files to TileStache-ready format; basically add the following before the `</Layer>` directive:
+
+          <Datasource>
+            <Parameter name="type">python</Parameter>
+            <Parameter name="factory">TileStache.Goodies.VecTiles:Datasource</Parameter>
+            <Parameter name="template">http://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.mvt?access_token=<insert your token here></Parameter>
+            <Parameter name="sort_key">sort_key</Parameter>
+          </Datasource>
+
+- may also want to not require access token to be in Mapnik XML files and instead try to pull from $MapboxAccessToken environment variable.  tried to “$MapboxAccessToken” directly within XML file but it just got picked up as a literal
+
+- ALTERNATIVELY: use [mapnik-vector-tile](https://github.com/mapbox/mapnik-vector-tile) to read mapnik stylesheets and render images;  probably should do that anyway to fix possible styling issues based on old version of mapnik and horrible installation processes to get there.  It requires mapnik3 built from master, though, as opposed to homebrew’s version
+
+CURRENT EVALUATION STEPS
+- bring in a more complex mapnik stylesheet example from mapbox studio classic and see how it renders; may also want to look into nik2img to validate what it's doing 
+- if the above styling doesn’t work well with mapnik 2.x, use mapnik3 and add-on vector tile library;  write mapbox for advice on using it + mapnik to render xml stylesheets to images;  MAYBE EVEN USE [tilelive-mapnik](https://github.com/mapbox/tilelive-mapnik)?  probably only supports web merc.   also there’s a nice diagram of the tilelive ecosystem [here](https://github.com/mapbox/tilelive#ecosytem-of-tilelive).
+
+
 Misc notes
 - may need to install xcode command line tools to install Pillow (xcode-select --install)
 
